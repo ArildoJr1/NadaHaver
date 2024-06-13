@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snake Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f0f0f0;
+    }
+
+    .game-container {
+      border: 2px solid black;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <p id="pontuação">Pontuação: 0</p>
+  </div>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const gridSize = 20;
+    const tileCount = 20;
+    const snake = [{ x: 10, y: 10 }];
+    let dx = 0;
+    let dy = 0;
+    let appleX;
+    let appleY;
+    let pontuação = 0;
+
+    function drawSnake() {
+      snake.forEach((segment) => {
+        ctx.fillStyle = "#007f00";
+        ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
+        ctx.strokeStyle = "#fff";
+        ctx.strokeRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
+      });
+    }
+
+    function moveSnake() {
+      const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+      snake.unshift(head);
+      if (head.x === appleX && head.y === appleY) {
+        pontuação++;
+        generateApple();
+      } else {
+        snake.pop();
+      }
+    }
+
+    function generateApple() {
+      appleX = Math.floor(Math.random() * tileCount);
+      appleY = Math.floor(Math.random() * tileCount);
+      snake.forEach((segment) => {
+        if (appleX === segment.x && appleY === segment.y) {
+          generateApple();
+        }
+      });
+    }
+
+    function drawApple() {
+      ctx.fillStyle = "#ff0000";
+      ctx.fillRect(appleX * gridSize, appleY * gridSize, gridSize, gridSize);
+    }
+
+    function update() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawSnake();
+      drawApple();
+      moveSnake();
+
+      if (snake[0].x < 0 || snake[0].x >= tileCount || snake[0].y < 0 || snake[0].y >= tileCount) {
+        resetGame();
+      }
+
+      for (let i = 1; i < snake.length; i++) {
+        if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) {
+          resetGame();
+        }
+      }
+
+      document.getElementById("pontuação").innerText = "Pontuação: " + pontuação;
+    }
+
+    function resetGame() {
+      snake.length = 1;
+      snake[0] = { x: 10, y: 10 };
+      dx = 0;
+      dy = 0;
+      pontuação = 0;
+    }
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowUp" && dy === 0) {
+        dx = 0;
+        dy = -1;
+      }
+      if (event.key === "ArrowDown" && dy === 0) {
+        dx = 0;
+        dy = 1;
+      }
+      if (event.key === "ArrowLeft" && dx === 0) {
+        dx = -1;
+        dy = 0;
+      }
+      if (event.key === "ArrowRight" && dx === 0) {
+        dx = 1;
+        dy = 0;
+      }
+    });
+
+    generateApple();
+    setInterval(update, 100);
+  </script>
+</body>
+</html>
+
